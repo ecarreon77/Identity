@@ -6,13 +6,11 @@ import com.simple.identity.dto.RegisterRequest;
 import com.simple.identity.entity.User;
 import com.simple.identity.exception.EmailAlreadyExistsException;
 import com.simple.identity.repository.UserRepository;
-import com.simple.identity.security.CustomUserDetails;
 import com.simple.identity.security.JwtUtil;
 import com.simple.identity.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +55,10 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         String token = jwtUtil.generateToken(user);
+
+        user.setAuthToken(token);
+        userRepository.save(user);
+
         return new AuthResponse(token);
     }
 

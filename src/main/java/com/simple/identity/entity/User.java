@@ -24,4 +24,7 @@ public class User {
 
     private String role;
 
+    @Column(length = 500)  // JWTs can be long
+    private String authToken;
+
 }
