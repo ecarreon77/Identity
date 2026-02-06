@@ -7,8 +7,12 @@ import com.simple.identity.entity.User;
 import com.simple.identity.security.CustomUserDetails;
 import com.simple.identity.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -33,5 +37,16 @@ public class AuthController {
         System.out.println(authToken);
         return userDetails.getUser();
     }
+
+    @PostMapping("/logout")
+    public Map<String, String> logout(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        authService.logout(userDetails.getUsername());
+        SecurityContextHolder.clearContext();
+
+        return Map.of("message", "Logged out successfully");
+    }
+
 
 }

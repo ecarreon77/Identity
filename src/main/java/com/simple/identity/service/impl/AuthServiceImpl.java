@@ -62,4 +62,14 @@ public class AuthServiceImpl implements AuthService {
         return new AuthResponse(token);
     }
 
+    @Override
+    public void logout(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Invalidate token
+        user.setAuthToken(null);
+        userRepository.save(user);
+    }
+
 }
