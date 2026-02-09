@@ -8,6 +8,8 @@ import com.simple.identity.entity.User;
 import com.simple.identity.security.CustomUserDetails;
 import com.simple.identity.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +36,17 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @GetMapping("/activate")
+    public Map<String, Object> activateAccount(@RequestParam("token") String token) {
+
+        authService.activateAccount(token);
+
+        return Map.of(
+                "status", 200,
+                "message", "Account activated successfully!"
+        );
     }
 
     @GetMapping("/me")

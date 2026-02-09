@@ -19,11 +19,11 @@ public class EmailTemplateService {
                 .replace("{lastName}", user.getLastName());
     }
 
-    public String getRegistrationBody(User user) {
+    public String getRegistrationBody(User user, String token) {
         return registrationBody
                 .replace("{firstName}", user.getFirstName())
-                .replace("{lastName}", user.getLastName())
-                .replace("{email}", user.getEmail());
+                .replace("{email}", user.getEmail())
+                .replace("{token}", token);
     }
 
 }

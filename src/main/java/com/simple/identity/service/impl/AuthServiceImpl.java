@@ -6,9 +6,7 @@ import com.simple.identity.dto.EmailRequest;
 import com.simple.identity.dto.LoginRequest;
 import com.simple.identity.dto.RegisterRequest;
 import com.simple.identity.entity.User;
-import com.simple.identity.exception.EmailAlreadyExistsException;
-import com.simple.identity.exception.InvalidCredentialsException;
-import com.simple.identity.exception.InvalidSexException;
+import com.simple.identity.exception.*;
 import com.simple.identity.repository.UserRepository;
 import com.simple.identity.security.JwtUtil;
 import com.simple.identity.service.AuthService;
@@ -61,12 +59,12 @@ public class AuthServiceImpl implements AuthService {
                 .sex(request.getSex())
                 .build();
 
+        String token = jwtUtil.generateToken(user);
+        user.setAuthToken(token);
         userRepository.save(user);
 
-        String token = jwtUtil.generateToken(user);
-
         String subject = emailTemplateService.getRegistrationSubject(user);
-        String body = emailTemplateService.getRegistrationBody(user);
+        String body = emailTemplateService.getRegistrationBody(user, token);
 
         EmailRequest emailRequest = EmailRequest.builder()
                 .to(List.of(user.getEmail()))
@@ -81,6 +79,7 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             logger.error("Failed to send registration email to {}: {}", user.getEmail(), e.getMessage());
         }
+
 
         return new AuthResponse(token);
     }
@@ -101,12 +100,43 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if (!Boolean.TRUE.equals(user.getIsActivated())) {
+            throw new AccountNotActivatedException(
+                    "Account not activated. Please check your email."
+            );
+        }
+
         String token = jwtUtil.generateToken(user);
 
         user.setAuthToken(token);
         userRepository.save(user);
 
         return new AuthResponse(token);
+    }
+
+    @Override
+    public void activateAccount(String token) {
+
+        String email;
+        try {
+            email = jwtUtil.extractUsername(token);
+        } catch (Exception e) {
+            throw new InvalidActivationTokenException("Invalid activation token");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (!token.equals(user.getAuthToken()) || !jwtUtil.isTokenValid(token, user)) {
+            throw new InvalidActivationTokenException("Activation token invalid or expired");
+        }
+
+        if (Boolean.TRUE.equals(user.getIsActivated())) {
+            throw new AccountAlreadyActivatedException("Account is already activated");
+        }
+
+        user.setIsActivated(true);
+        userRepository.save(user);
     }
 
     @Override
