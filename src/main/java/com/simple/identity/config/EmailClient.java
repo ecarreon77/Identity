@@ -1,6 +1,5 @@
 package com.simple.identity.config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.simple.identity.dto.EmailRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -24,13 +23,12 @@ public class EmailClient {
         builder.part("email", emailJson)
                 .contentType(MediaType.APPLICATION_JSON);
 
-        // Capture the response as String
         return webClient.post()
                 .uri("/api/email/send")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .retrieve()
-                .bodyToMono(String.class)   // Read the actual response
+                .bodyToMono(String.class)
                 .block();
 
     }
