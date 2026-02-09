@@ -3,6 +3,7 @@ package com.simple.identity.controller;
 import com.simple.identity.dto.AuthResponse;
 import com.simple.identity.dto.LoginRequest;
 import com.simple.identity.dto.RegisterRequest;
+import com.simple.identity.dto.RegistrationResponse;
 import com.simple.identity.entity.User;
 import com.simple.identity.security.CustomUserDetails;
 import com.simple.identity.service.AuthService;
@@ -21,8 +22,13 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody RegisterRequest request) {
-        return authService.register(request);
+    public RegistrationResponse register(@RequestBody RegisterRequest request) {
+        authService.register(request);
+
+        return new RegistrationResponse(
+                200,
+                "Registration successful"
+        );
     }
 
     @PostMapping("/login")
