@@ -27,7 +27,6 @@ public class JwtUtil {
 
     @PostConstruct
     public void init() {
-        // Decode Base64/ASCII secret into a proper 256-bit key
         key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 

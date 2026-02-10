@@ -61,7 +61,6 @@ public class AuthServiceImpl implements AuthService {
 
         String token = jwtUtil.generateToken(user);
         user.setAuthToken(token);
-        userRepository.save(user);
 
         String subject = emailTemplateService.getRegistrationSubject(user);
         String body = emailTemplateService.getRegistrationBody(user, token);
@@ -77,10 +76,11 @@ public class AuthServiceImpl implements AuthService {
             emailClient.sendEmail(emailRequest);
             logger.info("Registration email sent successfully to {}", user.getEmail());
         } catch (Exception e) {
-            logger.error("Failed to send registration email to {}: {}", user.getEmail(), e.getMessage());
+            throw new EmailSendFailedException(
+                    "Failed to send registration email to " + user.getEmail() + ". Please try again later!");
         }
 
-
+        userRepository.save(user);
         return new AuthResponse(token);
     }
 
