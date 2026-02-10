@@ -3,12 +3,15 @@ package com.simple.identity.service;
 import com.simple.identity.dto.AuthResponse;
 import com.simple.identity.dto.LoginRequest;
 import com.simple.identity.dto.RegisterRequest;
+import com.simple.identity.dto.RegistrationResponse;
+
+import java.util.Map;
 
 public interface AuthService {
 
-    AuthResponse register(RegisterRequest request);
+    RegistrationResponse register(RegisterRequest request);
     AuthResponse login(LoginRequest request);
-    void activateAccount(String token);
-    void logout(String email);
+    Map<String, Object> activateAccount(String token);
+    Map<String, Object> logout(String email);
 
 }

@@ -8,8 +8,6 @@ import com.simple.identity.entity.User;
 import com.simple.identity.security.CustomUserDetails;
 import com.simple.identity.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +23,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public RegistrationResponse register(@RequestBody RegisterRequest request) {
-        authService.register(request);
-
-        return new RegistrationResponse(
-                200,
-                "Registration successful"
-        );
+        return authService.register(request);
     }
 
     @PostMapping("/login")
@@ -40,13 +33,7 @@ public class AuthController {
 
     @GetMapping("/activate")
     public Map<String, Object> activateAccount(@RequestParam("token") String token) {
-
-        authService.activateAccount(token);
-
-        return Map.of(
-                "status", 200,
-                "message", "Account activated successfully!"
-        );
+        return authService.activateAccount(token);
     }
 
     @GetMapping("/me")
@@ -55,14 +42,13 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public Map<String, String> logout(
+    public Map<String, Object> logout(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        authService.logout(userDetails.getUsername());
+        Map<String, Object> response = authService.logout(userDetails.getUsername());
         SecurityContextHolder.clearContext();
 
-        return Map.of("message", "Logged out successfully");
+        return response;
     }
-
 
 }

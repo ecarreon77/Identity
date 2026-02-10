@@ -1,10 +1,7 @@
 package com.simple.identity.service.impl;
 
 import com.simple.identity.config.EmailClient;
-import com.simple.identity.dto.AuthResponse;
-import com.simple.identity.dto.EmailRequest;
-import com.simple.identity.dto.LoginRequest;
-import com.simple.identity.dto.RegisterRequest;
+import com.simple.identity.dto.*;
 import com.simple.identity.entity.User;
 import com.simple.identity.exception.*;
 import com.simple.identity.repository.UserRepository;
@@ -21,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     @Override
-    public AuthResponse register(RegisterRequest request) {
+    public RegistrationResponse register(RegisterRequest request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new EmailAlreadyExistsException("Email already registered");
@@ -81,7 +79,10 @@ public class AuthServiceImpl implements AuthService {
         }
 
         userRepository.save(user);
-        return new AuthResponse(token);
+        return new RegistrationResponse(
+                200,
+                "Registration successful!"
+        );
     }
 
     @Override
@@ -115,7 +116,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void activateAccount(String token) {
+    public Map<String, Object> activateAccount(String token) {
 
         String email;
         try {
@@ -137,16 +138,25 @@ public class AuthServiceImpl implements AuthService {
 
         user.setIsActivated(true);
         userRepository.save(user);
+
+        return Map.of(
+                "status", 200,
+                "message", "Account activated successfully!"
+        );
     }
 
     @Override
-    public void logout(String email) {
+    public Map<String, Object> logout(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Invalidate token
         user.setAuthToken(null);
         userRepository.save(user);
+
+        return Map.of(
+                "status", 200,
+                "message", "Logged out successfully!"
+        );
     }
 
 }
