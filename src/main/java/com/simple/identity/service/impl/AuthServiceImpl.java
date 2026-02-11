@@ -2,8 +2,10 @@ package com.simple.identity.service.impl;
 
 import com.simple.identity.config.EmailClient;
 import com.simple.identity.dto.*;
+import com.simple.identity.entity.BlacklistedToken;
 import com.simple.identity.entity.User;
 import com.simple.identity.exception.*;
+import com.simple.identity.repository.BlacklistedTokenRepository;
 import com.simple.identity.repository.UserRepository;
 import com.simple.identity.security.JwtUtil;
 import com.simple.identity.service.AuthService;
@@ -30,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final EmailClient emailClient;
     private final EmailTemplateService emailTemplateService;
+    private final BlacklistedTokenRepository blacklistedTokenRepository;
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     @Override
@@ -146,16 +149,46 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Map<String, Object> logout(String email) {
+    public Map<String, Object> logout(String email, String token) {
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        blacklistedTokenRepository.save(new BlacklistedToken(token));
 
         user.setAuthToken(null);
         userRepository.save(user);
 
         return Map.of(
                 "status", 200,
-                "message", "Logged out successfully!"
+                "message", "Logged out successfully. Token revoked."
+        );
+    }
+
+    @Override
+    public UserDto validateToken(String authHeader) {
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Missing or invalid Authorization header");
+        }
+
+        String token = authHeader.replace("Bearer ", "");
+
+        if (blacklistedTokenRepository.existsById(token)) {
+            throw new InvalidTokenException("Token is revoked (logged out)");
+        }
+
+        User user = userRepository.findByAuthToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
+
+        if (user.getAuthToken() == null) {
+            throw new InvalidTokenException("User logged out. Token expired.");
+        }
+
+        return new UserDto(
+                user.getEmail(),
+                user.getFirstName(),
+                user.getRole()
         );
     }
 

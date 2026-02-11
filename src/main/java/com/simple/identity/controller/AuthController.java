@@ -1,9 +1,6 @@
 package com.simple.identity.controller;
 
-import com.simple.identity.dto.AuthResponse;
-import com.simple.identity.dto.LoginRequest;
-import com.simple.identity.dto.RegisterRequest;
-import com.simple.identity.dto.RegistrationResponse;
+import com.simple.identity.dto.*;
 import com.simple.identity.entity.User;
 import com.simple.identity.security.CustomUserDetails;
 import com.simple.identity.service.AuthService;
@@ -43,12 +40,20 @@ public class AuthController {
 
     @PostMapping("/logout")
     public Map<String, Object> logout(
+            @RequestHeader("Authorization") String authHeader,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Map<String, Object> response = authService.logout(userDetails.getUsername());
+
+        String token = authHeader.replace("Bearer ", "");
+        Map<String, Object> response = authService.logout(userDetails.getUsername(), token);
         SecurityContextHolder.clearContext();
 
         return response;
+    }
+
+    @GetMapping("/validate")
+    public UserDto validate(@RequestHeader("Authorization") String authHeader) {
+        return authService.validateToken(authHeader);
     }
 
 }
