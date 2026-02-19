@@ -56,4 +56,13 @@ public class AuthController {
         return authService.validateToken(authHeader);
     }
 
+    @PostMapping("/change-password")
+    public ChangePasswordResponse changePassword(
+            @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return authService.changePassword(userDetails.getUsername(), request);
+    }
+
+
 }

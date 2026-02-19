@@ -75,5 +75,32 @@ public class GlobalExceptionHandler {
                         "message", ex.getMessage()
                 ));
     }
+
+    @ExceptionHandler(OldPasswordIncorrectException.class)
+    public ResponseEntity<Map<String, Object>> handleOldPasswordIncorrect(OldPasswordIncorrectException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "status", 400,
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(PasswordMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handlePasswordMismatch(PasswordMismatchException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "status", 400,
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(PasswordReuseException.class)
+    public ResponseEntity<Map<String, Object>> handlePasswordReuse(PasswordReuseException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "status", 400,
+                        "message", ex.getMessage()
+                ));
+    }
 }
 

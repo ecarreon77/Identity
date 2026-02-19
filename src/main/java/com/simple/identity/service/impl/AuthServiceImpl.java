@@ -33,7 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailClient emailClient;
     private final EmailTemplateService emailTemplateService;
     private final BlacklistedTokenRepository blacklistedTokenRepository;
-    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     @Override
     public RegistrationResponse register(RegisterRequest request) {
@@ -189,6 +189,36 @@ public class AuthServiceImpl implements AuthService {
                 user.getEmail(),
                 user.getFirstName(),
                 user.getRole()
+        );
+    }
+
+    @Override
+    public ChangePasswordResponse changePassword(String email, ChangePasswordRequest request) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new OldPasswordIncorrectException("Old password is incorrect");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
+            throw new PasswordMismatchException("New passwords do not match");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new PasswordReuseException("New password must be different from old password");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        user.setAuthToken(null);
+
+        userRepository.save(user);
+
+        return new ChangePasswordResponse(
+                200,
+                "Password changed successfully. Please login again."
         );
     }
 

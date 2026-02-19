@@ -11,5 +11,6 @@ public interface AuthService {
     Map<String, Object> activateAccount(String token);
     Map<String, Object> logout(String email, String token);
     UserDto validateToken(String token);
+    ChangePasswordResponse changePassword(String email, ChangePasswordRequest request);
 
 }
