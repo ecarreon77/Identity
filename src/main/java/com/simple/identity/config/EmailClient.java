@@ -1,5 +1,7 @@
 package com.simple.identity.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simple.identity.dto.EmailRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,7 +10,6 @@ import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import tools.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +28,7 @@ public class EmailClient {
 
     private final WebClient webClient = WebClient.builder().build();
 
-    public String sendEmail(EmailRequest emailRequest) {
+    public String sendEmail(EmailRequest emailRequest) throws JsonProcessingException {
         String emailJson = objectMapper.writeValueAsString(emailRequest);
 
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
