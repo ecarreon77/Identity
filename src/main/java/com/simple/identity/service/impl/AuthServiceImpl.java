@@ -73,19 +73,33 @@ public class AuthServiceImpl implements AuthService {
                 .html(true)
                 .build();
 
+        boolean emailSent = false;
+
         try {
             emailClient.sendEmail(emailRequest);
             logger.info("Registration email sent successfully to {}", user.getEmail());
+            emailSent = true;
         } catch (Exception e) {
-            throw new EmailSendFailedException(
-                    "Failed to send registration email to " + user.getEmail() + ". Please try again later!");
+//            throw new EmailSendFailedException(
+//                    "Failed to send registration email to " + user.getEmail() + ". Please try again later!");
+            logger.error("Failed to send registration email to {}", user.getEmail(), e);
+
+            // If email fails, auto-activate user
+            user.setIsActivated(true);
         }
 
         userRepository.save(user);
-        return new RegistrationResponse(
-                200,
-                "Registration successful!"
-        );
+        if (emailSent) {
+            return new RegistrationResponse(
+                    200,
+                    "Registration successful!"
+            );
+        } else {
+            return new RegistrationResponse(
+                    200,
+                    "Registration successful, but email is not sent!"
+            );
+        }
     }
 
     @Override
