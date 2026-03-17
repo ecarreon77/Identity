@@ -200,6 +200,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         return new UserDto(
+                user.getId(),
                 user.getEmail(),
                 user.getFirstName(),
                 user.getRole()
