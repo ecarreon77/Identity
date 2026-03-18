@@ -2,8 +2,10 @@ package com.simple.identity.controller;
 
 import com.simple.identity.dto.*;
 import com.simple.identity.entity.User;
+import com.simple.identity.exception.RateLimitExceededException;
 import com.simple.identity.security.CustomUserDetails;
 import com.simple.identity.service.AuthService;
+import com.simple.identity.service.RateLimitService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +19,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final RateLimitService rateLimitService;
 
     @PostMapping("/register")
     public RegistrationResponse register(@RequestBody RegisterRequest request) {
@@ -25,7 +28,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request) {
-        return authService.login(request);
+        if (rateLimitService.isRateLimited(request.getEmail())) {
+            throw new RateLimitExceededException("Too many login attempts. Please try again later.");
+        }
+        AuthResponse authResponse = authService.login(request);
+        rateLimitService.recordLoginAttempt(request.getEmail());
+        return authResponse;
     }
 
     @GetMapping("/activate")
@@ -43,7 +51,6 @@ public class AuthController {
             @RequestHeader("Authorization") String authHeader,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-
         String token = authHeader.replace("Bearer ", "");
         Map<String, Object> response = authService.logout(userDetails.getUsername(), token);
         SecurityContextHolder.clearContext();

@@ -20,6 +20,16 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // Handle RateLimitExceededException for too many login attempts
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleRateLimitExceeded(RateLimitExceededException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(Map.of(
+                        "status", 429,
+                        "message", ex.getMessage()
+                ));
+    }
+
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidToken(InvalidTokenException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
