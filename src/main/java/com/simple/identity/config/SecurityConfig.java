@@ -52,7 +52,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",                // Development
-                "https://diagnosify-app.onrender.com"   // Production
+                "https://diagnosify-app.onrender.com",   // Render
+                "identity-production-b8cf.up.railway.app"   // Railway
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
